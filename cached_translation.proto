@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+
+// The greeting service definition.
+service CachedTranslation {
+  // Sends a greeting
+  rpc GetTranslation (TranslationRequest) returns (TranslationReply) {}
+}
+
+// The request message containing the user's name.
+message TranslationRequest {
+  string text = 1;
+  string targetLanguage = 2;
+}
+
+// The response message containing the greetings
+message TranslationReply {
+  string translatedText = 1;
+  string detectedSourceLanguage = 2;
+  string input = 3;
+}
