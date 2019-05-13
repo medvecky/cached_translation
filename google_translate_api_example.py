@@ -12,17 +12,13 @@ r = redis.Redis(
     charset="utf-8",
     decode_responses=True)
 
-trans = {"Field1":"Value1", "Field2": "Value2"}
+trans = {"Field1": "Value1", "Field2": "Value2"}
 
 r.delete("test")
 
-
-r.rpush('test', "translation")
-r.rpush('test', "language")
-r.rpush('test', "input")
-
+r.hmset('test', {"Field1": "Value1", "Field2": "Value2"})
 
 if r.exists('test'):
-    print(r.lrange('test', 0, -1))
+    print(r.hgetall('test'))
 else:
     print("no entry")

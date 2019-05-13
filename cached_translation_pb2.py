@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x18\x63\x61\x63hed_translation.proto\":\n\x12TranslationRequest\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x16\n\x0etargetLanguage\x18\x02 \x01(\t\"Y\n\x10TranslationReply\x12\x16\n\x0etranslatedText\x18\x01 \x01(\t\x12\x1e\n\x16\x64\x65tectedSourceLanguage\x18\x02 \x01(\t\x12\r\n\x05input\x18\x03 \x01(\t2O\n\x11\x43\x61\x63hedTranslation\x12:\n\x0eGetTranslation\x12\x13.TranslationRequest\x1a\x11.TranslationReply\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x18\x63\x61\x63hed_translation.proto\":\n\x12TranslationRequest\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x16\n\x0etargetLanguage\x18\x02 \x01(\t\"\\\n\x1cTranslationWithSourceRequest\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x16\n\x0etargetLanguage\x18\x02 \x01(\t\x12\x16\n\x0esourceLanguage\x18\x03 \x01(\t\"Y\n\x10TranslationReply\x12\x16\n\x0etranslatedText\x18\x01 \x01(\t\x12\x1e\n\x16\x64\x65tectedSourceLanguage\x18\x02 \x01(\t\x12\r\n\x05input\x18\x03 \x01(\t\"C\n\x1aTranslationWithSourceReply\x12\x16\n\x0etranslatedText\x18\x01 \x01(\t\x12\r\n\x05input\x18\x02 \x01(\t2\xa9\x01\n\x11\x43\x61\x63hedTranslation\x12:\n\x0eGetTranslation\x12\x13.TranslationRequest\x1a\x11.TranslationReply\"\x00\x12X\n\x18GetTranslationWithSource\x12\x1d.TranslationWithSourceRequest\x1a\x1b.TranslationWithSourceReply\"\x00\x62\x06proto3')
 )
 
 
@@ -64,6 +64,51 @@ _TRANSLATIONREQUEST = _descriptor.Descriptor(
 )
 
 
+_TRANSLATIONWITHSOURCEREQUEST = _descriptor.Descriptor(
+  name='TranslationWithSourceRequest',
+  full_name='TranslationWithSourceRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='text', full_name='TranslationWithSourceRequest.text', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='targetLanguage', full_name='TranslationWithSourceRequest.targetLanguage', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='sourceLanguage', full_name='TranslationWithSourceRequest.sourceLanguage', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=88,
+  serialized_end=180,
+)
+
+
 _TRANSLATIONREPLY = _descriptor.Descriptor(
   name='TranslationReply',
   full_name='TranslationReply',
@@ -104,12 +149,52 @@ _TRANSLATIONREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=88,
-  serialized_end=177,
+  serialized_start=182,
+  serialized_end=271,
+)
+
+
+_TRANSLATIONWITHSOURCEREPLY = _descriptor.Descriptor(
+  name='TranslationWithSourceReply',
+  full_name='TranslationWithSourceReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='translatedText', full_name='TranslationWithSourceReply.translatedText', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='input', full_name='TranslationWithSourceReply.input', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=273,
+  serialized_end=340,
 )
 
 DESCRIPTOR.message_types_by_name['TranslationRequest'] = _TRANSLATIONREQUEST
+DESCRIPTOR.message_types_by_name['TranslationWithSourceRequest'] = _TRANSLATIONWITHSOURCEREQUEST
 DESCRIPTOR.message_types_by_name['TranslationReply'] = _TRANSLATIONREPLY
+DESCRIPTOR.message_types_by_name['TranslationWithSourceReply'] = _TRANSLATIONWITHSOURCEREPLY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 TranslationRequest = _reflection.GeneratedProtocolMessageType('TranslationRequest', (_message.Message,), dict(
@@ -119,12 +204,26 @@ TranslationRequest = _reflection.GeneratedProtocolMessageType('TranslationReques
   ))
 _sym_db.RegisterMessage(TranslationRequest)
 
+TranslationWithSourceRequest = _reflection.GeneratedProtocolMessageType('TranslationWithSourceRequest', (_message.Message,), dict(
+  DESCRIPTOR = _TRANSLATIONWITHSOURCEREQUEST,
+  __module__ = 'cached_translation_pb2'
+  # @@protoc_insertion_point(class_scope:TranslationWithSourceRequest)
+  ))
+_sym_db.RegisterMessage(TranslationWithSourceRequest)
+
 TranslationReply = _reflection.GeneratedProtocolMessageType('TranslationReply', (_message.Message,), dict(
   DESCRIPTOR = _TRANSLATIONREPLY,
   __module__ = 'cached_translation_pb2'
   # @@protoc_insertion_point(class_scope:TranslationReply)
   ))
 _sym_db.RegisterMessage(TranslationReply)
+
+TranslationWithSourceReply = _reflection.GeneratedProtocolMessageType('TranslationWithSourceReply', (_message.Message,), dict(
+  DESCRIPTOR = _TRANSLATIONWITHSOURCEREPLY,
+  __module__ = 'cached_translation_pb2'
+  # @@protoc_insertion_point(class_scope:TranslationWithSourceReply)
+  ))
+_sym_db.RegisterMessage(TranslationWithSourceReply)
 
 
 
@@ -134,8 +233,8 @@ _CACHEDTRANSLATION = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=179,
-  serialized_end=258,
+  serialized_start=343,
+  serialized_end=512,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetTranslation',
@@ -144,6 +243,15 @@ _CACHEDTRANSLATION = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_TRANSLATIONREQUEST,
     output_type=_TRANSLATIONREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetTranslationWithSource',
+    full_name='CachedTranslation.GetTranslationWithSource',
+    index=1,
+    containing_service=None,
+    input_type=_TRANSLATIONWITHSOURCEREQUEST,
+    output_type=_TRANSLATIONWITHSOURCEREPLY,
     serialized_options=None,
   ),
 ])

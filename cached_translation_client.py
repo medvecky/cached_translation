@@ -11,11 +11,19 @@ def run():
     with grpc.insecure_channel('localhost:50051') as channel:
         stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)
         response = stub.GetTranslation(cached_translation_pb2.TranslationRequest(
-            text="Window",
-            targetLanguage="lv"))
-    print("translatedText: " + response.translatedText)
-    print("detectedSourceLanguage: " + response.detectedSourceLanguage)
-    print("input: " + response.input)
+            text="tout",
+            targetLanguage="ru"))
+        print("translatedText: " + response.translatedText)
+        print("detectedSourceLanguage: " + response.detectedSourceLanguage)
+        print("input: " + response.input)
+
+        response = stub.GetTranslationWithSource(cached_translation_pb2.TranslationWithSourceRequest(
+            text="tout",
+            targetLanguage="ru",
+            sourceLanguage="en"))
+
+        print("translatedText: " + response.translatedText)
+        print("input: " + response.input)
 
 
 if __name__ == '__main__':
