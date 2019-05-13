@@ -28,8 +28,6 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
     def GetTranslationWithSource(self, request, context):
         translation = self.GetGoogleTranslationWithSource(request)
 
-        print(translation)
-
         return cached_translation_pb2.TranslationWithSourceReply(
             translatedText=translation["translatedText"],
             input=translation["input"])
