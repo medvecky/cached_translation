@@ -1,22 +1,17 @@
 # Imports the Google Cloud client library
 from google.cloud import translate
+import os
+import urllib
+import redis
 
+url = urllib.parse.urlparse(os.environ.get('REDISCLOUD_URL'))
+r = redis.Redis(
+    host=url.hostname,
+    port=url.port,
+    password=url.password,
+    charset="utf-8",
+    decode_responses=True)
 
-def get_google_translation(text, target_language, client):
-    if not text or not target_language or not client:
-        return "Parameters missing"
-    translation = client.translate(
-        text,
-        target_language=target_language)
-    return translation
+r.set('HEllo world фывафыва фывафывавы ываыфвавфыа фывавыав ыфвавыа вф', 'Привет')
 
-
-# Instantiates a client
-translate_client = translate.Client()
-
-while True:
-    text = input("Enter text for translation: ")
-    if text == "EXIT!":
-        break
-    target = input("Enter target language: ")
-    print(get_google_translation(text, target, translate_client))
+print(r.get('HEllo world фывафыва фывафывавы ываыфвавфыа фывавыав ыфвавыа вф'))
