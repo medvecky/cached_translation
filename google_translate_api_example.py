@@ -12,6 +12,17 @@ r = redis.Redis(
     charset="utf-8",
     decode_responses=True)
 
-r.set('HEllo world фывафыва фывафывавы ываыфвавфыа фывавыав ыфвавыа вф', 'Привет')
+trans = {"Field1":"Value1", "Field2": "Value2"}
 
-print(r.get('HEllo world фывафыва фывафывавы ываыфвавфыа фывавыав ыфвавыа вф'))
+r.delete("test")
+
+
+r.rpush('test', "translation")
+r.rpush('test', "language")
+r.rpush('test', "input")
+
+
+if r.exists('test'):
+    print(r.lrange('test', 0, -1))
+else:
+    print("no entry")
