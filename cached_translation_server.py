@@ -4,6 +4,8 @@ import logging
 
 import grpc
 
+from google.cloud import translate
+
 import cached_translation_pb2
 import cached_translation_pb2_grpc
 
@@ -12,11 +14,25 @@ _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
+
+    def __init__(self):
+        self.translate_client = translate.Client()
+
     def GetTranslation(self, request, context):
+
+        translation = self.GetGoogleTranslation(request)
+
         return cached_translation_pb2.TranslationReply(
-            translatedText=request.text,
-            detectedSourceLanguage=request.targetLanguage,
-            input="input stub")
+            translatedText=translation["translatedText"],
+            detectedSourceLanguage=translation["detectedSourceLanguage"],
+            input=translation["input"])
+
+    def GetGoogleTranslation(self, request):
+        translation = self.translate_client.translate(
+        request.text,
+        request.targetLanguage)
+        return translation
+
 
 
 def serve():
