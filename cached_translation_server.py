@@ -20,29 +20,27 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
     def GetTranslation(self, request, context):
         translation = self.GetGoogleTranslation(request)
 
-        return cached_translation_pb2.TranslationReply(
-            translatedText=translation["translatedText"],
-            detectedSourceLanguage=translation["detectedSourceLanguage"],
-            input=translation["input"])
-
-    def GetTranslationWithSource(self, request, context):
-        translation = self.GetGoogleTranslationWithSource(request)
-
-        return cached_translation_pb2.TranslationWithSourceReply(
-            translatedText=translation["translatedText"],
-            input=translation["input"])
+        if request.sourceLanguage:
+            return cached_translation_pb2.TranslationReply(
+                translatedText=translation["translatedText"],
+                detectedSourceLanguage="",
+                input=translation["input"])
+        else:
+            return cached_translation_pb2.TranslationReply(
+                translatedText=translation["translatedText"],
+                detectedSourceLanguage=translation["detectedSourceLanguage"],
+                input=translation["input"])
 
     def GetGoogleTranslation(self, request):
-        translation = self.translate_client.translate(
-            request.text,
-            target_language=request.targetLanguage)
-        return translation
-
-    def GetGoogleTranslationWithSource(self, request):
-        translation = self.translate_client.translate(
-            request.text,
-            source_language=request.sourceLanguage,
-            target_language=request.targetLanguage)
+        if request.sourceLanguage:
+            translation = self.translate_client.translate(
+                request.text,
+                source_language=request.sourceLanguage,
+                target_language=request.targetLanguage)
+        else:
+            translation = self.translate_client.translate(
+                request.text,
+                target_language=request.targetLanguage)
         return translation
 
 

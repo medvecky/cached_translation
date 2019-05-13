@@ -17,12 +17,13 @@ def run():
         print("detectedSourceLanguage: " + response.detectedSourceLanguage)
         print("input: " + response.input)
 
-        response = stub.GetTranslationWithSource(cached_translation_pb2.TranslationWithSourceRequest(
+        response = stub.GetTranslation(cached_translation_pb2.TranslationRequest(
             text="tout",
             targetLanguage="ru",
             sourceLanguage="en"))
 
         print("translatedText: " + response.translatedText)
+        print("detectedSourceLanguage: " + response.detectedSourceLanguage)
         print("input: " + response.input)
 
 

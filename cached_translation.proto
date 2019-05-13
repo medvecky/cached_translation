@@ -1,33 +1,20 @@
 syntax = "proto3";
 
 
-
 service CachedTranslation {
-  rpc GetTranslation (TranslationRequest) returns (TranslationReply) {}
-
-  rpc GetTranslationWithSource (TranslationWithSourceRequest) returns (TranslationWithSourceReply) {}
+    rpc GetTranslation (TranslationRequest) returns (TranslationReply) {}
 }
 
 
 message TranslationRequest {
-  string text = 1;
-  string targetLanguage = 2;
+    string text = 1;
+    string targetLanguage = 2;
+    string sourceLanguage = 3;
 }
-
-message TranslationWithSourceRequest {
-  string text = 1;
-  string targetLanguage = 2;
-  string sourceLanguage = 3;
-}
-
 
 message TranslationReply {
-  string translatedText = 1;
-  string detectedSourceLanguage = 2;
-  string input = 3;
+    string translatedText = 1;
+    string detectedSourceLanguage = 2;
+    string input = 3;
 }
 
-message TranslationWithSourceReply {
-  string translatedText = 1;
-  string input = 2;
-}
