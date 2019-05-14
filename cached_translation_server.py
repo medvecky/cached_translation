@@ -9,6 +9,10 @@ from google.cloud import translate
 import cached_translation_pb2
 import cached_translation_pb2_grpc
 
+import os
+import urllib
+import redis
+
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 
@@ -16,9 +20,29 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
     def __init__(self):
         self.translate_client = translate.Client()
+        url = urllib.parse.urlparse(os.environ.get('REDISCLOUD_URL'))
+        self.redis = redis.Redis(
+            host=url.hostname,
+            port=url.port,
+            password=url.password,
+            charset="utf-8",
+            decode_responses=True)
 
     def GetTranslation(self, request, context):
-        translation = self.GetGoogleTranslation(request)
+        key = request.text
+
+        if request.sourceLanguage:
+            key += ":" + request.sourceLanguage
+
+        print(key)
+
+        if self.redis.exists(key):
+            print("Get from cache")
+            translation = self.redis.hgetall(key)
+        else:
+            translation = self.GetGoogleTranslation(request)
+            self.redis.hmset(key, translation)
+            print("Save to cache")
 
         if request.sourceLanguage:
             return cached_translation_pb2.TranslationReply(
