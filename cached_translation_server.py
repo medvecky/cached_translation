@@ -29,7 +29,7 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
             decode_responses=True)
 
     def GetTranslation(self, request, context):
-        key = request.text
+        key = request.text + ":" + request.targetLanguage
 
         if request.sourceLanguage:
             key += ":" + request.sourceLanguage
@@ -40,9 +40,12 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
             print("Get from cache")
             translation = self.redis.hgetall(key)
         else:
-            translation = self.GetGoogleTranslation(request)
-            self.redis.hmset(key, translation)
-            print("Save to cache")
+            try:
+                translation = self.GetGoogleTranslation(request)
+                self.redis.hmset(key, translation)
+                print("Save to cache")
+            except:
+                translation = {"translatedText": "", "detectedSourceLanguage": "", "input": "BAD ARGUMENT" }
 
         if request.sourceLanguage:
             return cached_translation_pb2.TranslationReply(
