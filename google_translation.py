@@ -1,5 +1,6 @@
 from google.cloud import translate
 
+
 class GoogleTranslation():
     def __init__(self):
         self.translate_client = translate.Client()

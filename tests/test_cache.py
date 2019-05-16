@@ -1,6 +1,7 @@
-from cached_translations.redis_cache import RedisCache
+from redis_cache import RedisCache
 
-class TestCache():
+
+class TestCache:
     def test_save_get_value(self):
         cache = RedisCache()
         key = "x1:y1"
