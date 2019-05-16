@@ -4,14 +4,11 @@ import logging
 
 import grpc
 
-from google.cloud import translate
+from google_translation import GoogleTranslation
+from redis_cache import RedisCache
 
 import cached_translation_pb2
 import cached_translation_pb2_grpc
-
-import os
-import urllib
-import redis
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -19,14 +16,8 @@ _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
     def __init__(self):
-        self.translate_client = translate.Client()
-        url = urllib.parse.urlparse(os.environ.get('REDISCLOUD_URL'))
-        self.redis = redis.Redis(
-            host=url.hostname,
-            port=url.port,
-            password=url.password,
-            charset="utf-8",
-            decode_responses=True)
+        self.cloud_translation = GoogleTranslation()
+        self.cache = RedisCache()
 
     def GetTranslation(self, request, context):
         key = request.text + ":" + request.targetLanguage
@@ -36,13 +27,13 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
         print(key)
 
-        if self.redis.exists(key):
+        if self.cache.check_cache(key):
             print("Get from cache")
-            translation = self.redis.hgetall(key)
+            translation = self.cache.get_from_cache(key)
         else:
             try:
-                translation = self.GetGoogleTranslation(request)
-                self.redis.hmset(key, translation)
+                translation = self.cloud_translation.get_translation(request)
+                self.cache.save_to_cache(key, translation)
                 print("Save to cache")
             except:
                 translation = {"translatedText": "", "detectedSourceLanguage": "", "input": "BAD ARGUMENT" }
@@ -57,18 +48,6 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
                 translatedText=translation["translatedText"],
                 detectedSourceLanguage=translation["detectedSourceLanguage"],
                 input=translation["input"])
-
-    def GetGoogleTranslation(self, request):
-        if request.sourceLanguage:
-            translation = self.translate_client.translate(
-                request.text,
-                source_language=request.sourceLanguage,
-                target_language=request.targetLanguage)
-        else:
-            translation = self.translate_client.translate(
-                request.text,
-                target_language=request.targetLanguage)
-        return translation
 
 
 def serve():

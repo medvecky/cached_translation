@@ -2,3 +2,4 @@ google-cloud-translate
 grpcio
 grpcio-tools
 redis
+pytest
