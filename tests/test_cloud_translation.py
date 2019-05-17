@@ -1,4 +1,5 @@
-from google_translation import GoogleTranslation
+# from google_translation import GoogleTranslation
+from ..google_translation import GoogleTranslation
 
 from collections import namedtuple
 

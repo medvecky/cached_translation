@@ -14,8 +14,8 @@ class CachedTranslationStub(object):
     Args:
       channel: A grpc.Channel.
     """
-    self.GetTranslation = channel.unary_unary(
-        '/CachedTranslation/GetTranslation',
+    self.GetTranslations = channel.unary_unary(
+        '/CachedTranslation/GetTranslations',
         request_serializer=cached__translation__pb2.TranslationRequest.SerializeToString,
         response_deserializer=cached__translation__pb2.TranslationReply.FromString,
         )
@@ -25,7 +25,7 @@ class CachedTranslationServicer(object):
   # missing associated documentation comment in .proto file
   pass
 
-  def GetTranslation(self, request, context):
+  def GetTranslations(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -35,8 +35,8 @@ class CachedTranslationServicer(object):
 
 def add_CachedTranslationServicer_to_server(servicer, server):
   rpc_method_handlers = {
-      'GetTranslation': grpc.unary_unary_rpc_method_handler(
-          servicer.GetTranslation,
+      'GetTranslations': grpc.unary_unary_rpc_method_handler(
+          servicer.GetTranslations,
           request_deserializer=cached__translation__pb2.TranslationRequest.FromString,
           response_serializer=cached__translation__pb2.TranslationReply.SerializeToString,
       ),

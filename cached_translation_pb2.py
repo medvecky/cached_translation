@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x18\x63\x61\x63hed_translation.proto\"R\n\x12TranslationRequest\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x16\n\x0etargetLanguage\x18\x02 \x01(\t\x12\x16\n\x0esourceLanguage\x18\x03 \x01(\t\"Y\n\x10TranslationReply\x12\x16\n\x0etranslatedText\x18\x01 \x01(\t\x12\x1e\n\x16\x64\x65tectedSourceLanguage\x18\x02 \x01(\t\x12\r\n\x05input\x18\x03 \x01(\t2O\n\x11\x43\x61\x63hedTranslation\x12:\n\x0eGetTranslation\x12\x13.TranslationRequest\x1a\x11.TranslationReply\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x18\x63\x61\x63hed_translation.proto\"S\n\x12TranslationRequest\x12\r\n\x05texts\x18\x01 \x03(\t\x12\x16\n\x0etargetLanguage\x18\x02 \x01(\t\x12\x16\n\x0esourceLanguage\x18\x03 \x01(\t\"T\n\x0bTranslation\x12\x16\n\x0etranslatedText\x18\x01 \x01(\t\x12\x1e\n\x16\x64\x65tectedSourceLanguage\x18\x02 \x01(\t\x12\r\n\x05input\x18\x03 \x01(\t\"6\n\x10TranslationReply\x12\"\n\x0ctranslations\x18\x01 \x03(\x0b\x32\x0c.Translation2P\n\x11\x43\x61\x63hedTranslation\x12;\n\x0fGetTranslations\x12\x13.TranslationRequest\x1a\x11.TranslationReply\"\x00\x62\x06proto3')
 )
 
 
@@ -34,9 +34,9 @@ _TRANSLATIONREQUEST = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='text', full_name='TranslationRequest.text', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      name='texts', full_name='TranslationRequest.texts', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -67,33 +67,33 @@ _TRANSLATIONREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=28,
-  serialized_end=110,
+  serialized_end=111,
 )
 
 
-_TRANSLATIONREPLY = _descriptor.Descriptor(
-  name='TranslationReply',
-  full_name='TranslationReply',
+_TRANSLATION = _descriptor.Descriptor(
+  name='Translation',
+  full_name='Translation',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='translatedText', full_name='TranslationReply.translatedText', index=0,
+      name='translatedText', full_name='Translation.translatedText', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='detectedSourceLanguage', full_name='TranslationReply.detectedSourceLanguage', index=1,
+      name='detectedSourceLanguage', full_name='Translation.detectedSourceLanguage', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='input', full_name='TranslationReply.input', index=2,
+      name='input', full_name='Translation.input', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -111,11 +111,44 @@ _TRANSLATIONREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=112,
-  serialized_end=201,
+  serialized_start=113,
+  serialized_end=197,
 )
 
+
+_TRANSLATIONREPLY = _descriptor.Descriptor(
+  name='TranslationReply',
+  full_name='TranslationReply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='translations', full_name='TranslationReply.translations', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=199,
+  serialized_end=253,
+)
+
+_TRANSLATIONREPLY.fields_by_name['translations'].message_type = _TRANSLATION
 DESCRIPTOR.message_types_by_name['TranslationRequest'] = _TRANSLATIONREQUEST
+DESCRIPTOR.message_types_by_name['Translation'] = _TRANSLATION
 DESCRIPTOR.message_types_by_name['TranslationReply'] = _TRANSLATIONREPLY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -125,6 +158,13 @@ TranslationRequest = _reflection.GeneratedProtocolMessageType('TranslationReques
   # @@protoc_insertion_point(class_scope:TranslationRequest)
   ))
 _sym_db.RegisterMessage(TranslationRequest)
+
+Translation = _reflection.GeneratedProtocolMessageType('Translation', (_message.Message,), dict(
+  DESCRIPTOR = _TRANSLATION,
+  __module__ = 'cached_translation_pb2'
+  # @@protoc_insertion_point(class_scope:Translation)
+  ))
+_sym_db.RegisterMessage(Translation)
 
 TranslationReply = _reflection.GeneratedProtocolMessageType('TranslationReply', (_message.Message,), dict(
   DESCRIPTOR = _TRANSLATIONREPLY,
@@ -141,12 +181,12 @@ _CACHEDTRANSLATION = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=203,
-  serialized_end=282,
+  serialized_start=255,
+  serialized_end=335,
   methods=[
   _descriptor.MethodDescriptor(
-    name='GetTranslation',
-    full_name='CachedTranslation.GetTranslation',
+    name='GetTranslations',
+    full_name='CachedTranslation.GetTranslations',
     index=0,
     containing_service=None,
     input_type=_TRANSLATIONREQUEST,

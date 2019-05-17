@@ -1,4 +1,5 @@
-from redis_cache import RedisCache
+# from redis_cache import RedisCache
+from ..redis_cache import RedisCache
 
 
 class TestCache:
