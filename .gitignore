@@ -3,3 +3,4 @@ venv/
 .idea/
 pfm.db
 .*.py
+variables_set.sh
