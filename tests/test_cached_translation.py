@@ -17,17 +17,17 @@ class TestCachedTranslation:
         with grpc.insecure_channel('localhost:50051') as channel:
             stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)
 
-            response = stub.GetTranslation(cached_translation_pb2.TranslationRequest(
-                text="Hello world",
+            response = stub.GetTranslations(cached_translation_pb2.TranslationRequest(
+                texts=["Hello world"],
                 targetLanguage="ru",
                 sourceLanguage=""))
 
-        print("translatedText: " + response.translatedText)
-        print("detectedSourceLanguage: " + response.detectedSourceLanguage)
-        print("input: " + response.input)
-        assert response.translatedText == "Привет, мир"
-        assert response.detectedSourceLanguage == "en"
-        assert response.input == "Hello world"
+        print("translatedText: " + str(response.translations[0].translatedText))
+        print("detectedSourceLanguage: " + str(response.translations[0].detectedSourceLanguage))
+        print("input: " + response.translations[0].input)
+        assert response.translations[0].translatedText == "Привет, мир"
+        assert response.translations[0].detectedSourceLanguage == "en"
+        assert response.translations[0].input == "Hello world"
         assert cache.check_cache(key)
 
     def test_from_cloud_with_source(self):
@@ -39,17 +39,17 @@ class TestCachedTranslation:
         with grpc.insecure_channel('localhost:50051') as channel:
             stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)
 
-            response = stub.GetTranslation(cached_translation_pb2.TranslationRequest(
-                text="Hello world",
+            response = stub.GetTranslations(cached_translation_pb2.TranslationRequest(
+                texts=["Hello world"],
                 targetLanguage="ru",
                 sourceLanguage="en"))
 
-        print("translatedText: " + response.translatedText)
-        print("detectedSourceLanguage: " + response.detectedSourceLanguage)
-        print("input: " + response.input)
-        assert response.translatedText == "Привет, мир"
-        assert response.detectedSourceLanguage == ""
-        assert response.input == "Hello world"
+        print("translatedText: " + response.translations[0].translatedText)
+        print("detectedSourceLanguage: " + response.translations[0].detectedSourceLanguage)
+        print("input: " + response.translations[0].input)
+        assert response.translations[0].translatedText == "Привет, мир"
+        assert response.translations[0].detectedSourceLanguage == ""
+        assert response.translations[0].input == "Hello world"
         assert cache.check_cache(key)
 
     def test_from_cache_without_source(self):
@@ -68,17 +68,17 @@ class TestCachedTranslation:
         with grpc.insecure_channel('localhost:50051') as channel:
             stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)
 
-            response = stub.GetTranslation(cached_translation_pb2.TranslationRequest(
-                text="Hello world",
+            response = stub.GetTranslations(cached_translation_pb2.TranslationRequest(
+                texts=["Hello world"],
                 targetLanguage="ru",
                 sourceLanguage=""))
 
-        print("translatedText: " + response.translatedText)
-        print("detectedSourceLanguage: " + response.detectedSourceLanguage)
-        print("input: " + response.input)
-        assert response.translatedText == "Привет, мир [cached]"
-        assert response.detectedSourceLanguage == "en[cached]"
-        assert response.input == "Hello world[cached]"
+        print("translatedText: " + response.translations[0].translatedText)
+        print("detectedSourceLanguage: " + response.translations[0].detectedSourceLanguage)
+        print("input: " + response.translations[0].input)
+        assert response.translations[0].translatedText == "Привет, мир [cached]"
+        assert response.translations[0].detectedSourceLanguage == "en[cached]"
+        assert response.translations[0].input == "Hello world[cached]"
         assert cache.check_cache(key)
 
     def test_from_cache_with_source(self):
@@ -96,17 +96,17 @@ class TestCachedTranslation:
         with grpc.insecure_channel('localhost:50051') as channel:
             stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)
 
-            response = stub.GetTranslation(cached_translation_pb2.TranslationRequest(
-                text="Hello world",
+            response = stub.GetTranslations(cached_translation_pb2.TranslationRequest(
+                texts=["Hello world"],
                 targetLanguage="ru",
                 sourceLanguage="en"))
 
-        print("translatedText: " + response.translatedText)
-        print("detectedSourceLanguage: " + response.detectedSourceLanguage)
-        print("input: " + response.input)
-        assert response.translatedText == "Привет, мир [cached]"
-        assert response.detectedSourceLanguage == ""
-        assert response.input == "Hello world[cached]"
+        print("translatedText: " + response.translations[0].translatedText)
+        print("detectedSourceLanguage: " + response.translations[0].detectedSourceLanguage)
+        print("input: " + response.translations[0].input)
+        assert response.translations[0].translatedText == "Привет, мир [cached]"
+        assert response.translations[0].detectedSourceLanguage == ""
+        assert response.translations[0].input == "Hello world[cached]"
         assert cache.check_cache(key)
 
     def test_empty_text(self):
@@ -119,17 +119,17 @@ class TestCachedTranslation:
         with grpc.insecure_channel('localhost:50051') as channel:
             stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)
 
-            response = stub.GetTranslation(cached_translation_pb2.TranslationRequest(
-                text="Hello world",
+            response = stub.GetTranslations(cached_translation_pb2.TranslationRequest(
+                texts="Hello world",
                 targetLanguage="",
                 sourceLanguage="en"))
 
-        print("translatedText: " + response.translatedText)
-        print("detectedSourceLanguage: " + response.detectedSourceLanguage)
-        print("input: " + response.input)
-        assert response.translatedText == ""
-        assert response.detectedSourceLanguage == ""
-        assert response.input == "BAD ARGUMENT"
+        print("translatedText: " + response.translations[0].translatedText)
+        print("detectedSourceLanguage: " + response.translations[0].detectedSourceLanguage)
+        print("input: " + response.translations[0].input)
+        assert response.translations[0].translatedText == ""
+        assert response.translations[0].detectedSourceLanguage == ""
+        assert response.translations[0].input == "BAD ARGUMENT"
         assert not cache.check_cache(key)
 
     def test_empty_target(self):
@@ -142,15 +142,15 @@ class TestCachedTranslation:
         with grpc.insecure_channel('localhost:50051') as channel:
             stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)
 
-            response = stub.GetTranslation(cached_translation_pb2.TranslationRequest(
-                text="Hello world",
+            response = stub.GetTranslations(cached_translation_pb2.TranslationRequest(
+                texts=["Hello world"],
                 targetLanguage="",
                 sourceLanguage="en"))
 
-        print("translatedText: " + response.translatedText)
-        print("detectedSourceLanguage: " + response.detectedSourceLanguage)
-        print("input: " + response.input)
-        assert response.translatedText == ""
-        assert response.detectedSourceLanguage == ""
-        assert response.input == "BAD ARGUMENT"
+        print("translatedText: " + response.translations[0].translatedText)
+        print("detectedSourceLanguage: " + response.translations[0].detectedSourceLanguage)
+        print("input: " + response.translations[0].input)
+        assert response.translations[0].translatedText == ""
+        assert response.translations[0].detectedSourceLanguage == ""
+        assert response.translations[0].input == "BAD ARGUMENT"
         assert not cache.check_cache(key)
