@@ -11,9 +11,9 @@ def run():
     with grpc.insecure_channel('localhost:50051') as channel:
         stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)
 
-        texts = [""]
-        source_language = "de"
-        target_language=""
+        texts = ["Hello world guys"]
+        source_language = "en"
+        target_language="ru"
 
         response = stub.GetTranslations(cached_translation_pb2.TranslationRequest(
             texts=texts,
@@ -21,7 +21,8 @@ def run():
             sourceLanguage=source_language))
 
 
-    print(response)
+    print(response.translations[0].translatedText)
+    print(response.translations[0].input)
 
 
 if __name__ == '__main__':
