@@ -2,6 +2,7 @@ import os
 import urllib
 import redis
 
+
 class RedisCache():
     def __init__(self):
         url = urllib.parse.urlparse(os.environ.get('REDISCLOUD_URL'))

@@ -16,12 +16,12 @@ _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 TranslationRequest = namedtuple("TranslationRequest", "text targetLanguage sourceLanguage")
 
+
 class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
     def __init__(self):
         self.cloud_translation = GoogleTranslation()
         self.cache = RedisCache()
-
 
     def GetTranslations(self, request, context):
 
@@ -36,9 +36,6 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
             translations.append(self.GetTranslation(translation_request))
 
         return cached_translation_pb2.TranslationReply(translations=translations)
-
-
-
 
     def GetTranslation(self, translation_request):
         key = translation_request.text + ":" + translation_request.targetLanguage
@@ -57,7 +54,7 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
                 self.cache.save_to_cache(key, translation)
                 print("Save to cache")
             except:
-                translation = {"translatedText": "", "detectedSourceLanguage": "", "input": "BAD ARGUMENT" }
+                translation = {"translatedText": "", "detectedSourceLanguage": "", "input": "BAD ARGUMENT"}
         return translation
 
 
