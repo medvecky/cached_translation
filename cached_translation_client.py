@@ -15,6 +15,7 @@ parser.add_argument("strings", metavar="Text", type=str, nargs="+")
 
 args = parser.parse_args()
 
+
 def run():
     with grpc.insecure_channel('localhost:50051') as channel:
         stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)

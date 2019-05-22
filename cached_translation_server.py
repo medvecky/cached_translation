@@ -7,7 +7,7 @@ import grpc
 from collections import namedtuple
 
 from google_translation import GoogleTranslation
-from redis_cache import RedisCache
+from redis_cache_20 import RedisCache
 
 import cached_translation_pb2
 import cached_translation_pb2_grpc
@@ -40,23 +40,41 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
     def GetTranslation(self, translation_request):
 
         if self.cache.check_cache(
-            translation_request.text,
-            translation_request.sourceLanguage,
-            translation_request.targetLanguage):
+                translation_request.text,
+                translation_request.sourceLanguage,
+                translation_request.targetLanguage):
             print("Get from cache")
-            translated_text = self.cache.get_from_cache(
+            translated_text, source = self.cache.get_from_cache(
                 translation_request.text,
                 translation_request.sourceLanguage,
                 translation_request.targetLanguage)
-            translation = {"translatedText": text,
-                            "detectedSourceLanguage": "", "input": "BAD ARGUMENT"}
+            if translation_request.sourceLanguage:
+                translation = {"translatedText": translated_text,
+                               "detectedSourceLanguage": "",
+                               "input": translation_request.text}
+            else:
+                translation = {"translatedText": translated_text,
+                               "detectedSourceLanguage": source,
+                               "input": translation_request.text}
         else:
             try:
                 translation = self.cloud_translation.get_translation(translation_request)
-                self.cache.save_to_cache(key, translation)
+
+                if translation_request.sourceLanguage:
+                    self.cache.save_to_cache(
+                        translation,
+                        translation_request.sourceLanguage,
+                        translation_request.targetLanguage)
+                else:
+                    self.cache.save_to_cache(
+                        translation,
+                        translation["detectedSourceLanguage"],
+                        translation_request.targetLanguage)
                 print("Save to cache")
             except:
-                translation = {"translatedText": "", "detectedSourceLanguage": "", "input": "BAD ARGUMENT"}
+                translation = {"translatedText": "",
+                               "detectedSourceLanguage": "",
+                               "input": "BAD ARGUMENT"}
         return translation
 
 

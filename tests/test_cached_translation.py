@@ -3,7 +3,7 @@ import grpc
 import cached_translation_pb2
 import cached_translation_pb2_grpc
 
-from redis_cache import RedisCache
+from redis_cache_20 import RedisCache
 
 
 class TestCachedTranslation:
@@ -28,7 +28,6 @@ class TestCachedTranslation:
         assert response.translations[0].translatedText == "Привет, мир"
         assert response.translations[0].detectedSourceLanguage == "en"
         assert response.translations[0].input == "Hello world"
-        assert cache.check_cache(key)
 
     def test_from_cloud_with_source(self):
         cache = RedisCache()
@@ -50,7 +49,6 @@ class TestCachedTranslation:
         assert response.translations[0].translatedText == "Привет, мир"
         assert response.translations[0].detectedSourceLanguage == ""
         assert response.translations[0].input == "Hello world"
-        assert cache.check_cache(key)
 
     def test_from_cache_without_source(self):
         cache = RedisCache()

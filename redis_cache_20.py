@@ -18,15 +18,16 @@ class RedisCache():
     def check_cache(self, text, source, target):
         if source:
             source_key = "source_lang:" + source
-            return self.chek_source_key(text, source_key, target)
+            return self.check_source_key(text, source_key, target)
         else:
             for source_key in self.redis.scan_iter("source_lang:*"):
-                if self.chek_source_key( text, source_key, target):
+                if self.check_source_key(text, source_key, target):
                     return True
             return False
 
     def save_to_cache(self, translation, source, target):
         source_key = "source_lang:" + source
+        print(source_key)
 
         if self.redis.hexists(source_key, translation["input"]):
             id_key = str(self.redis.hget(source_key, translation["input"]))
@@ -40,7 +41,7 @@ class RedisCache():
     def get_from_cache(self, text, source, target):
         if not source:
             for source_key in self.redis.scan_iter("source_lang:*"):
-                if self.chek_source_key(text, source_key, target):
+                if self.check_source_key(text, source_key, target):
                     source = source_key[12:]
                     break
 
@@ -48,7 +49,7 @@ class RedisCache():
         id_key = str(self.redis.hget(source_key, text))
         return self.redis.hget(id_key, target), source
 
-    def chek_source_key(self, text, source_key, target):
+    def check_source_key(self, text, source_key, target):
 
         if self.redis.hexists(source_key, text):
             id_key = self.redis.hget(source_key, text)
