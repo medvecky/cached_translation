@@ -15,28 +15,52 @@ class RedisCache():
         if not self.redis.get("id_key"):
             self.redis.set("id_key", 1)
 
-    def check_cache(self, key):
-        return self.redis.exists(key)
-
-    def save_to_cache(self, translation, target, source=""):
+    def check_cache(self, text, source, target):
         if source:
-            if self.redis.hmget(source, translation["input"]):
-                id_key = self.redis.hmget(source, translation["input"])
-                self.redis.hmset(id_key, {target: translation["translatedText"]})
-            else:
-                self.redis.incr("id_key")
-                id_key = self.redis.get("id_key")
-                self.redis.hmset(source, {translation["input"]: id})
-                self.redis.hmset(id_key, {target: translation["translatedText"]})
+            source_key = "source_lang:" + source
+            return self.chek_source_key(text, source_key, target)
         else:
-            if self.redis.hmget(translation["detectedSourceLanguage"], translation["input"]):
-                id_key = self.redis.hmget(translation["detectedSourceLanguage"], translation["input"])
-                self.redis.hmset(id_key, {target: translation["translatedText"]})
-            else:
-                self.redis.incr("id_key")
-                id_key = self.redis.get("id_key")
-                self.redis.hmset(translation["detectedSourceLanguage"], {translation["input"]: id})
-                self.redis.hmset(id_key, {target: translation["translatedText"]})
+            for source_key in self.redis.scan_iter("source_lang:*"):
+                if self.chek_source_key( text, source_key, target):
+                    return True
+            return False
 
-    def get_from_cache(self, key):
-        return self.redis.hgetall(key)
+    def save_to_cache(self, translation, source, target):
+        source_key = "source_lang:" + source
+
+        if self.redis.hexists(source_key, translation["input"]):
+            id_key = str(self.redis.hget(source_key, translation["input"]))
+            self.redis.hset(id_key, target, translation["translatedText"])
+        else:
+            id_key = str(self.redis.get("id_key"))
+            self.redis.hset(source_key, translation["input"],id_key)
+            self.redis.hset(id_key, target, translation["translatedText"])
+            self.redis.incr("id_key")
+
+    def get_from_cache(self, text, source, target):
+        if not source:
+            for source_key in self.redis.scan_iter("source_lang:*"):
+                if self.chek_source_key(text, source_key, target):
+                    source = source_key[12:]
+                    break
+
+        source_key = "source_lang:" + source
+        id_key = str(self.redis.hget(source_key, text))
+        return self.redis.hget(id_key, target), source
+
+    def chek_source_key(self, text, source_key, target):
+
+        if self.redis.hexists(source_key, text):
+            id_key = self.redis.hget(source_key, text)
+            if self.redis.hexists(id_key, target):
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def flushall(self):
+        self.redis.flushall()
+        self.redis.flushdb()
+
+

@@ -38,16 +38,18 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
         return cached_translation_pb2.TranslationReply(translations=translations)
 
     def GetTranslation(self, translation_request):
-        key = translation_request.text + ":" + translation_request.targetLanguage
 
-        if translation_request.sourceLanguage:
-            key += ":" + translation_request.sourceLanguage
-
-        print(key)
-
-        if self.cache.check_cache(key):
+        if self.cache.check_cache(
+            translation_request.text,
+            translation_request.sourceLanguage,
+            translation_request.targetLanguage):
             print("Get from cache")
-            translation = self.cache.get_from_cache(key)
+            translated_text = self.cache.get_from_cache(
+                translation_request.text,
+                translation_request.sourceLanguage,
+                translation_request.targetLanguage)
+            translation = {"translatedText": text,
+                            "detectedSourceLanguage": "", "input": "BAD ARGUMENT"}
         else:
             try:
                 translation = self.cloud_translation.get_translation(translation_request)
