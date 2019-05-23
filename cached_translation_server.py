@@ -27,15 +27,21 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
         translations = []
 
-        for text in request.texts:
-            translation_request = TranslationRequest(
-                text=text,
-                targetLanguage=request.targetLanguage,
-                sourceLanguage=request.sourceLanguage)
+        if len(request.texts):
+            for text in request.texts:
+                translation_request = TranslationRequest(
+                    text=text,
+                    targetLanguage=request.targetLanguage,
+                    sourceLanguage=request.sourceLanguage)
 
-            translations.append(self.GetTranslation(translation_request))
-
+                translations.append(self.GetTranslation(translation_request))
+        else:
+            translation = {"translatedText": "",
+                           "detectedSourceLanguage": "",
+                           "input": "BAD ARGUMENT"}
+            translations.append(translation)
         return cached_translation_pb2.TranslationReply(translations=translations)
+
 
     def GetTranslation(self, translation_request):
 

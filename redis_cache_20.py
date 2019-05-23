@@ -32,10 +32,12 @@ class RedisCache():
         if self.redis.hexists(source_key, translation["input"]):
             id_key = str(self.redis.hget(source_key, translation["input"]))
             self.redis.hset(id_key, target, translation["translatedText"])
+            print("id_key: {}, target: {}".format(id_key, target))
         else:
             id_key = str(self.redis.get("id_key"))
             self.redis.hset(source_key, translation["input"],id_key)
             self.redis.hset(id_key, target, translation["translatedText"])
+            print("id_key: {}, target: {}".format(id_key, target))
             self.redis.incr("id_key")
 
     def get_from_cache(self, text, source, target):

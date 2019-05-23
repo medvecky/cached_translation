@@ -77,6 +77,8 @@ class TestCache:
     def test_save_get_value_second_layer(self):
         cache = RedisCache()
         cache.flushall()
+
+
         assert not cache.check_cache("text", "en", "ru")
         assert not cache.check_cache("text", "en", "uk")
 
