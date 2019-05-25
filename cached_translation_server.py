@@ -25,64 +25,59 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
     def GetTranslations(self, request, context):
 
-        translations = []
+        cached_translations = []
+
+        translation_request = TranslationRequest(
+                     text=[],
+                     targetLanguage=request.targetLanguage,
+                     sourceLanguage=request.sourceLanguage)
 
         if len(request.texts):
             for text in request.texts:
-                translation_request = TranslationRequest(
-                    text=text,
-                    targetLanguage=request.targetLanguage,
-                    sourceLanguage=request.sourceLanguage)
+                if self.cache.check_cache(text, request.sourceLanguage, request.targetLanguage):
+                    translated_text, source = self.cache.get_from_cache(
+                        text,
+                        request.sourceLanguage,
+                        request.targetLanguage)
 
-                translations.append(self.GetTranslation(translation_request))
+                    if request.sourceLanguage:
+                        translation = {"translatedText": translated_text,
+                           "input": text}
+                    else:
+                        translation = {"translatedText": translated_text,
+                               "detectedSourceLanguage": source,
+                               "input": text}
+                    cached_translations.append(translation)
+                else:
+                    translation_request.text.append(text)
+
+            if len(translation_request.text):
+
+                cloud_translations = self.cloud_translation.get_translation(translation_request)
+
+                for cloud_translation in cloud_translations:
+                    if request.sourceLanguage:
+                        self.cache.save_to_cache(
+                            cloud_translation,
+                            request.sourceLanguage,
+                            request.targetLanguage)
+                    else:
+                         self.cache.save_to_cache(
+                            cloud_translation,
+                            cloud_translation["detectedSourceLanguage"],
+                            request.targetLanguage)
+            else:
+                cloud_translations = []
+
+            translations = cached_translations + cloud_translations
+            print(translations)
         else:
             translation = {"translatedText": "",
-                           "detectedSourceLanguage": "",
-                           "input": "BAD ARGUMENT"}
-            translations.append(translation)
+                          "detectedSourceLanguage": "",
+                          "input": "BAD ARGUMENT"}
+            cached_translations.append(translation)
+
         return cached_translation_pb2.TranslationReply(translations=translations)
-
-
-    def GetTranslation(self, translation_request):
-
-        if self.cache.check_cache(
-                translation_request.text,
-                translation_request.sourceLanguage,
-                translation_request.targetLanguage):
-            print("Get from cache")
-            translated_text, source = self.cache.get_from_cache(
-                translation_request.text,
-                translation_request.sourceLanguage,
-                translation_request.targetLanguage)
-            if translation_request.sourceLanguage:
-                translation = {"translatedText": translated_text,
-                               "detectedSourceLanguage": "",
-                               "input": translation_request.text}
-            else:
-                translation = {"translatedText": translated_text,
-                               "detectedSourceLanguage": source,
-                               "input": translation_request.text}
-        else:
-            try:
-                translation = self.cloud_translation.get_translation(translation_request)
-
-                if translation_request.sourceLanguage:
-                    self.cache.save_to_cache(
-                        translation,
-                        translation_request.sourceLanguage,
-                        translation_request.targetLanguage)
-                else:
-                    self.cache.save_to_cache(
-                        translation,
-                        translation["detectedSourceLanguage"],
-                        translation_request.targetLanguage)
-                print("Save to cache")
-            except:
-                translation = {"translatedText": "",
-                               "detectedSourceLanguage": "",
-                               "input": "BAD ARGUMENT"}
-        return translation
-
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

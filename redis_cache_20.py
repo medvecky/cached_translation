@@ -26,6 +26,7 @@ class RedisCache():
             return False
 
     def save_to_cache(self, translation, source, target):
+        print("Saved to cache")
         source_key = "source_lang:" + source
         print(source_key)
 
@@ -41,6 +42,7 @@ class RedisCache():
             self.redis.incr("id_key")
 
     def get_from_cache(self, text, source, target):
+        print("From cache")
         if not source:
             for source_key in self.redis.scan_iter("source_lang:*"):
                 if self.check_source_key(text, source_key, target):
