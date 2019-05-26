@@ -17,6 +17,13 @@ _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 TranslationRequest = namedtuple("TranslationRequest", "text targetLanguage sourceLanguage")
 
 
+def find_translation(translations, text):
+    for translation in translations:
+        if translation["input"] == text:
+            return translation
+    return False
+
+
 class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
     def __init__(self):
@@ -25,12 +32,18 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
     def GetTranslations(self, request, context):
 
+        bad_translation = {"translatedText": "",
+                           "detectedSourceLanguage": "",
+                           "input": "BAD ARGUMENT"}
+
         cached_translations = []
 
+        result_translations = []
+
         translation_request = TranslationRequest(
-                     text=[],
-                     targetLanguage=request.targetLanguage,
-                     sourceLanguage=request.sourceLanguage)
+            text=[],
+            targetLanguage=request.targetLanguage,
+            sourceLanguage=request.sourceLanguage)
 
         if len(request.texts):
             for text in request.texts:
@@ -42,18 +55,21 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
                     if request.sourceLanguage:
                         translation = {"translatedText": translated_text,
-                           "input": text}
+                                       "input": text}
                     else:
                         translation = {"translatedText": translated_text,
-                               "detectedSourceLanguage": source,
-                               "input": text}
+                                       "detectedSourceLanguage": source,
+                                       "input": text}
                     cached_translations.append(translation)
                 else:
                     translation_request.text.append(text)
 
             if len(translation_request.text):
 
-                cloud_translations = self.cloud_translation.get_translation(translation_request)
+                try:
+                    cloud_translations = self.cloud_translation.get_translation(translation_request)
+                except:
+                    cloud_translations = [bad_translation]
 
                 for cloud_translation in cloud_translations:
                     if request.sourceLanguage:
@@ -62,22 +78,29 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
                             request.sourceLanguage,
                             request.targetLanguage)
                     else:
-                         self.cache.save_to_cache(
+                        self.cache.save_to_cache(
                             cloud_translation,
                             cloud_translation["detectedSourceLanguage"],
                             request.targetLanguage)
             else:
                 cloud_translations = []
 
-            translations = cached_translations + cloud_translations
-            print(translations)
-        else:
-            translation = {"translatedText": "",
-                          "detectedSourceLanguage": "",
-                          "input": "BAD ARGUMENT"}
-            cached_translations.append(translation)
+            for text in request.texts:
+                translation = find_translation(cached_translations, text)
+                if translation:
+                    result_translations.append(translation)
+                    continue
+                result_translations.append(find_translation(cloud_translations, text))
 
-        return cached_translation_pb2.TranslationReply(translations=translations)
+            print(result_translations)
+        else:
+            cached_translations.append(bad_translation)
+
+        if not len(result_translations) or not result_translations[0]:
+            result_translations = [bad_translation]
+
+        return cached_translation_pb2.TranslationReply(translations=result_translations)
+
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
