@@ -18,9 +18,12 @@ TranslationRequest = namedtuple("TranslationRequest", "text targetLanguage sourc
 
 
 def find_translation(translations, text):
-    for translation in translations:
-        if translation["input"] == text:
-            return translation
+    if text in translations:
+        tmp = translations[text]
+        translation = {"translatedText": tmp[0],
+                       "detectedSourceLanguage": tmp[1],
+                       "input": text}
+        return translation
     return False
 
 
@@ -36,9 +39,13 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
                            "detectedSourceLanguage": "",
                            "input": "BAD ARGUMENT"}
 
-        cached_translations = []
+        cached_translations = {}
 
         result_translations = []
+
+        cloud_translations = {}
+
+        cloud_responses = []
 
         translation_request = TranslationRequest(
             text=[],
@@ -54,34 +61,33 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
                         request.targetLanguage)
 
                     if request.sourceLanguage:
-                        translation = {"translatedText": translated_text,
-                                       "input": text}
+                        cached_translations[text] = (translated_text, "")
                     else:
-                        translation = {"translatedText": translated_text,
-                                       "detectedSourceLanguage": source,
-                                       "input": text}
-                    cached_translations.append(translation)
+                        cached_translations[text] = (translated_text, source)
                 else:
                     translation_request.text.append(text)
 
             if len(translation_request.text):
-
                 try:
-                    cloud_translations = self.cloud_translation.get_translation(translation_request)
+                    cloud_responses = self.cloud_translation.get_translation(translation_request)
                 except:
-                    cloud_translations = [bad_translation]
+                    cloud_translations[bad_translation["input"]] = ("", "")
 
-                for cloud_translation in cloud_translations:
+                for cloud_response in cloud_responses:
                     if request.sourceLanguage:
                         self.cache.save_to_cache(
-                            cloud_translation,
+                            cloud_response,
                             request.sourceLanguage,
                             request.targetLanguage)
+                        cloud_translations[cloud_response["input"]] = (cloud_response["translatedText"], "")
+
                     else:
                         self.cache.save_to_cache(
-                            cloud_translation,
-                            cloud_translation["detectedSourceLanguage"],
+                            cloud_response,
+                            cloud_response["detectedSourceLanguage"],
                             request.targetLanguage)
+                        cloud_translations[cloud_response["input"]] = (cloud_response["translatedText"],
+                                                                       cloud_response["detectedSourceLanguage"])
             else:
                 cloud_translations = []
 
@@ -94,7 +100,7 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
             print(result_translations)
         else:
-            cached_translations.append(bad_translation)
+            cached_translations[bad_translation["input"]] = ("", "")
 
         if not len(result_translations) or not result_translations[0]:
             result_translations = [bad_translation]
