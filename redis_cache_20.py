@@ -1,6 +1,7 @@
 import os
 import urllib
 import redis
+import re
 
 
 class RedisCache():
@@ -12,57 +13,37 @@ class RedisCache():
             password=url.password,
             encoding="utf-8",
             decode_responses=True)
-        if not self.redis.get("id_key"):
-            self.redis.set("id_key", 1)
 
     def check_cache(self, text, source, target):
         if source:
-            source_key = "source_lang:" + source
-            return self.check_source_key(text, source_key, target)
+            key = source + ":" + target
+            return self.check_source_key(text, key, target)
         else:
-            for source_key in self.redis.scan_iter("source_lang:*"):
-                if self.check_source_key(text, source_key, target):
+            for key in self.redis.scan_iter("*"):
+                if self.check_source_key(text, key, target):
                     return True
             return False
 
     def save_to_cache(self, translation, source, target):
         print("Saved to cache")
-        source_key = "source_lang:" + source
-        print(source_key)
-
-        if self.redis.hexists(source_key, translation["input"]):
-            id_key = str(self.redis.hget(source_key, translation["input"]))
-            self.redis.hset(id_key, target, translation["translatedText"])
-            print("id_key: {}, target: {}".format(id_key, target))
-        else:
-            id_key = str(self.redis.get("id_key"))
-            self.redis.hset(source_key, translation["input"],id_key)
-            self.redis.hset(id_key, target, translation["translatedText"])
-            print("id_key: {}, target: {}".format(id_key, target))
-            self.redis.incr("id_key")
+        key = source + ":" + target
+        print(key)
+        self.redis.hset(key,translation["input"], translation["translatedText"])
 
     def get_from_cache(self, text, source, target):
         print("From cache")
         if not source:
-            for source_key in self.redis.scan_iter("source_lang:*"):
-                if self.check_source_key(text, source_key, target):
-                    source = source_key[12:]
-                    break
+            for key in self.redis.scan_iter("*"):
+                if self.check_source_key(text, key, target):
+                    match_obj = re.match( r'(.*):', key)
+                    source = match_obj.group(1)
+        key = source + ":" + target
+        return self.redis.hget(key, text), source
 
-        source_key = "source_lang:" + source
-        id_key = str(self.redis.hget(source_key, text))
-        return self.redis.hget(id_key, target), source
-
-    def check_source_key(self, text, source_key, target):
-
-        if self.redis.hexists(source_key, text):
-            id_key = self.redis.hget(source_key, text)
-            if self.redis.hexists(id_key, target):
-                return True
-            else:
-                return False
-        else:
-            return False
+    def check_source_key(self, text, key, target):
+        if self.redis.hexists(key, text):
+            return True
+        return False
 
     def flushall(self):
         self.redis.flushall()
