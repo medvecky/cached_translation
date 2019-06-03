@@ -2,6 +2,7 @@ import os
 import urllib
 import redis
 import re
+import json
 
 
 class RedisCache():
@@ -14,39 +15,40 @@ class RedisCache():
             encoding="utf-8",
             decode_responses=True)
 
-    def check_cache(self, text, source, target):
-        if source:
-            key = source + ":" + target
-            return self.check_source_key(text, key, target)
-        else:
-            for key in self.redis.scan_iter("*"):
-                if self.check_source_key(text, key, target):
-                    return True
-            return False
-
-    def save_to_cache(self, translation, source, target):
+    def save_to_cache(self, translations, source, target):
         print("Saved to cache")
         key = source + ":" + target
         print(key)
-        self.redis.hset(key,translation["input"], translation["translatedText"])
+        set_for_caching = {}
+        for translation in translations:
+            if source == "auto":
+                set_for_caching[translation["input"]] = \
+                    json.dumps({"translatedText": translation["translatedText"],
+                                "detectedSourceLanguage": translation["detectedSourceLanguage"]})
+            else:
+                set_for_caching[translation["input"]] = translation["translatedText"]
+        self.redis.hmset(key, set_for_caching)
 
-    def get_from_cache(self, text, source, target):
+    def get_from_cache(self, texts, source, target):
         print("From cache")
-        if not source:
-            for key in self.redis.scan_iter("*"):
-                if self.check_source_key(text, key, target):
-                    match_obj = re.match( r'(.*):', key)
-                    source = match_obj.group(1)
         key = source + ":" + target
-        return self.redis.hget(key, text), source
+        cache_response = self.redis.hmget(key, texts)
+        results_from_cache = dict(zip(texts, cache_response))
+        cached_translations = {}
+        not_translated_texts = []
+        for text in texts:
+            if results_from_cache[text]:
+                if source == "auto":
+                    translation = json.loads(results_from_cache[text])
+                    cached_translations[text] = (translation["translatedText"], translation["detectedSourceLanguage"])
+                else:
+                    translation = results_from_cache[text]
+                    cached_translations[text] = (translation["translatedText"], source)
+            else:
+                not_translated_texts.append(text)
 
-    def check_source_key(self, text, key, target):
-        if self.redis.hexists(key, text):
-            return True
-        return False
+        return cached_translations, not_translated_texts
 
     def flushall(self):
         self.redis.flushall()
         self.redis.flushdb()
-
-
