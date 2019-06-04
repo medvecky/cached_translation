@@ -34,10 +34,9 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
         self.cache = RedisCache()
 
     def GetTranslations(self, request, context):
-
         bad_translation = {"translatedText": "",
-                           "detectedSourceLanguage": "",
-                           "input": "BAD ARGUMENT"}
+                          "detectedSourceLanguage": "",
+                          "input": "BAD ARGUMENT"}
 
         cached_translations = {}
 
@@ -53,44 +52,37 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
             sourceLanguage=request.sourceLanguage)
 
         if len(request.texts):
-            for text in request.texts:
-                if self.cache.check_cache(text, request.sourceLanguage, request.targetLanguage):
-                    translated_text, source = self.cache.get_from_cache(
-                        text,
-                        request.sourceLanguage,
-                        request.targetLanguage)
+            cached_translations, not_translated_texts = self.cache.get_from_cache(
+                request.texts,
+                request.sourceLanguage,
+                request.targetLanguage)
 
-                    if request.sourceLanguage:
-                        cached_translations[text] = (translated_text, "")
-                    else:
-                        cached_translations[text] = (translated_text, source)
-                else:
-                    translation_request.text.append(text)
+            print("Cached translations")
+            print(cached_translations)
+            print("Not translated texts")
+            print(not_translated_texts)
+            translation_request.text.extend(not_translated_texts)
 
             if len(translation_request.text):
                 try:
                     cloud_responses = self.cloud_translation.get_translation(translation_request)
+                    self.cache.save_to_cache(cloud_responses, request.sourceLanguage, request.targetLanguage)
+                    for cloud_response in cloud_responses:
+                        if request.sourceLanguage:
+                            cloud_translations[cloud_response["input"]] = (cloud_response["translatedText"], "")
+                        else:
+                            cloud_translations[cloud_response["input"]] = (cloud_response["translatedText"],
+                                                                           cloud_response["detectedSourceLanguage"])
                 except:
                     cloud_translations[bad_translation["input"]] = ("", "")
-
-                for cloud_response in cloud_responses:
-                    if request.sourceLanguage:
-                        self.cache.save_to_cache(
-                            cloud_response,
-                            request.sourceLanguage,
-                            request.targetLanguage)
-                        cloud_translations[cloud_response["input"]] = (cloud_response["translatedText"], "")
-
-                    else:
-                        self.cache.save_to_cache(
-                            cloud_response,
-                            cloud_response["detectedSourceLanguage"],
-                            request.targetLanguage)
-                        cloud_translations[cloud_response["input"]] = (cloud_response["translatedText"],
-                                                                       cloud_response["detectedSourceLanguage"])
             else:
                 cloud_translations = []
 
+
+            print("Cached translations")
+            print(cached_translations)
+            print("Cloud transaltions")
+            print(cloud_translations)
             for text in request.texts:
                 translation = find_translation(cached_translations, text)
                 if translation:
@@ -98,6 +90,7 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
                     continue
                 result_translations.append(find_translation(cloud_translations, text))
 
+            print("Result tranlations")
             print(result_translations)
         else:
             cached_translations[bad_translation["input"]] = ("", "")
