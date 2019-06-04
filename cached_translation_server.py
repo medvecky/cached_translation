@@ -35,8 +35,8 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
     def GetTranslations(self, request, context):
         bad_translation = {"translatedText": "",
-                          "detectedSourceLanguage": "",
-                          "input": "BAD ARGUMENT"}
+                           "detectedSourceLanguage": "",
+                           "input": "BAD ARGUMENT"}
 
         cached_translations = {}
 
@@ -78,10 +78,9 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
             else:
                 cloud_translations = []
 
-
             print("Cached translations")
             print(cached_translations)
-            print("Cloud transaltions")
+            print("Cloud translations")
             print(cloud_translations)
             for text in request.texts:
                 translation = find_translation(cached_translations, text)
@@ -90,7 +89,7 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
                     continue
                 result_translations.append(find_translation(cloud_translations, text))
 
-            print("Result tranlations")
+            print("Result translations")
             print(result_translations)
         else:
             cached_translations[bad_translation["input"]] = ("", "")

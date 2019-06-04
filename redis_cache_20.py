@@ -1,7 +1,6 @@
 import os
 import urllib
 import redis
-import re
 import json
 
 
@@ -39,7 +38,7 @@ class RedisCache():
         if source:
             key = source + ":" + target
         else:
-             key = "auto:" + target
+            key = "auto:" + target
         cache_response = self.redis.hmget(key, texts)
         print("Cache response")
         print(cache_response)
