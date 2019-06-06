@@ -1,12 +1,23 @@
 version: '3.1'
 
 services:
-  jekyll:
+  redis:
     image: redis
     volumes:
       - redis-data:/data
     ports:
-      - '6379:6379'
+      - "6379:6379"
+    networks:
+      - cache-net
 
+  cached-translation:
+    build: .
+    ports:
+      - "50051:50051"
+    networks:
+      - cache-net
 volumes:
   redis-data:
+
+networks:
+  cache-net:

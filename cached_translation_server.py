@@ -11,6 +11,7 @@ from redis_cache_20 import RedisCache
 
 import cached_translation_pb2
 import cached_translation_pb2_grpc
+import logging
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -44,8 +45,6 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
         cloud_translations = {}
 
-        cloud_responses = []
-
         translation_request = TranslationRequest(
             text=[],
             targetLanguage=request.targetLanguage,
@@ -57,10 +56,6 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
                 request.sourceLanguage,
                 request.targetLanguage)
 
-            print("Cached translations")
-            print(cached_translations)
-            print("Not translated texts")
-            print(not_translated_texts)
             translation_request.text.extend(not_translated_texts)
 
             if len(translation_request.text):
@@ -78,10 +73,6 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
             else:
                 cloud_translations = []
 
-            print("Cached translations")
-            print(cached_translations)
-            print("Cloud translations")
-            print(cloud_translations)
             for text in request.texts:
                 translation = find_translation(cached_translations, text)
                 if translation:
@@ -89,8 +80,6 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
                     continue
                 result_translations.append(find_translation(cloud_translations, text))
 
-            print("Result translations")
-            print(result_translations)
         else:
             cached_translations[bad_translation["input"]] = ("", "")
 
