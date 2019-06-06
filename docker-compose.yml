@@ -1,0 +1,12 @@
+version: '3.1'
+
+services:
+  jekyll:
+    image: redis
+    volumes:
+      - redis-data:/data
+    ports:
+      - '6379:6379'
+
+volumes:
+  redis-data:

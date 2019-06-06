@@ -6,13 +6,17 @@ import json
 
 class RedisCache():
     def __init__(self):
-        url = urllib.parse.urlparse(os.environ.get('REDISCLOUD_URL'))
+        # url = urllib.parse.urlparse(os.environ.get('REDISCLOUD_URL'))
+        # self.redis = redis.Redis(
+        #     host=url.hostname,
+        #     port=url.port,
+        #     password=url.password,
+        #     encoding="utf-8",
+        #     decode_responses=True)
         self.redis = redis.Redis(
-            host=url.hostname,
-            port=url.port,
-            password=url.password,
+            host="localhost",
             encoding="utf-8",
-            decode_responses=True)
+            decode_responses=True)  
 
     def save_to_cache(self, translations, source, target):
         print("Saved to cache")
