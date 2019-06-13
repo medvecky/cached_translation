@@ -44,24 +44,25 @@ class RedisCache():
 
     def get_from_cache(self, texts, source, target):
         # logging.error("From cache")
-        if source:
-            key = source + ":" + target
-        else:
-            key = "auto:" + target
-        cache_response = self.redis.hmget(key, texts)
-        results_from_cache = dict(zip(texts, cache_response))
         cached_translations = {}
         not_translated_texts = []
-        for text in texts:
-            if results_from_cache[text]:
-                if not source:
-                    translation = json.loads(results_from_cache[text])
-                    cached_translations[text] = (translation["translatedText"], translation["detectedSourceLanguage"])
-                else:
-                    translation = results_from_cache[text]
-                    cached_translations[text] = (translation, source)
+        if len(texts):
+            if source:
+                key = source + ":" + target
             else:
-                not_translated_texts.append(text)
+                key = "auto:" + target
+            cache_response = self.redis.hmget(key, texts)
+            results_from_cache = dict(zip(texts, cache_response))
+            for text in texts:
+                if results_from_cache[text]:
+                    if not source:
+                        translation = json.loads(results_from_cache[text])
+                        cached_translations[text] = (translation["translatedText"], translation["detectedSourceLanguage"])
+                    else:
+                        translation = results_from_cache[text]
+                        cached_translations[text] = (translation, source)
+                else:
+                    not_translated_texts.append(text)
 
         return cached_translations, not_translated_texts
 

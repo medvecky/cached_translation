@@ -97,7 +97,7 @@ class TestCachedTranslation:
         assert response.translations[0].translatedText == "Привет, мир [cached]"
         assert response.translations[0].detectedSourceLanguage == "en"
         assert response.translations[0].input == "Hello world"
-        assert response.translations[1].translatedText == "Привет мир, ребята"
+        assert response.translations[1].translatedText == "Привет, мир, ребята"
         assert response.translations[1].detectedSourceLanguage == "en"
         assert response.translations[1].input == "Hello world guys"
 
@@ -124,7 +124,7 @@ class TestCachedTranslation:
         assert response.translations[0].translatedText == "Привет, мир [cached]"
         assert response.translations[0].detectedSourceLanguage == "en"
         assert response.translations[0].input == "Hello world"
-        assert response.translations[1].translatedText == "Привет мир, ребята"
+        assert response.translations[1].translatedText == "Привет, мир, ребята"
         assert response.translations[1].detectedSourceLanguage == ""
         assert response.translations[1].input == "Hello world guys"
 
