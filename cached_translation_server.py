@@ -30,7 +30,7 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
     def __init__(self):
         self.cloud_translation = GoogleTranslation()
-        self.cache = RedisCache().get_instance()
+        self.cache = RedisCache()
         self.bad_translation = {"translatedText": "",
                                 "detectedSourceLanguage": "",
                                 "input": "BAD ARGUMENT"}
