@@ -1,7 +1,5 @@
 from concurrent import futures
 import time
-import logging
-
 import grpc
 
 from collections import namedtuple
@@ -32,7 +30,7 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
 
     def __init__(self):
         self.cloud_translation = GoogleTranslation()
-        self.cache = RedisCache()
+        self.cache = RedisCache().get_instance()
         self.bad_translation = {"translatedText": "",
                                 "detectedSourceLanguage": "",
                                 "input": "BAD ARGUMENT"}
@@ -44,15 +42,13 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
             request.sourceLanguage,
             request.targetLanguage)
 
-        cloud_translations = self.get_cloud_translations(request, not_translated_texts)
+        cloud_translations = self.get_cloud_translations_and_save_to_cache(request, not_translated_texts)
 
         result_translations = self.merge_translations(request, cached_translations, cloud_translations)
 
         return cached_translation_pb2.TranslationReply(translations=result_translations)
 
-    def get_cloud_translations(self, request, not_translated_texts):
-
-        cloud_translations = {}
+    def get_cloud_translations_and_save_to_cache(self, request, not_translated_texts):
 
         translation_request = TranslationRequest(
             text=[],
@@ -62,19 +58,25 @@ class CachedTranslation(cached_translation_pb2_grpc.CachedTranslationServicer):
         translation_request.text.extend(not_translated_texts)
 
         if len(translation_request.text):
-            try:
-                cloud_responses = self.cloud_translation.get_translation(translation_request)
-                self.cache.save_to_cache(cloud_responses, request.sourceLanguage, request.targetLanguage)
-                for cloud_response in cloud_responses:
-                    if request.sourceLanguage:
-                        cloud_translations[cloud_response["input"]] = (cloud_response["translatedText"], "")
-                    else:
-                        cloud_translations[cloud_response["input"]] = (cloud_response["translatedText"],
-                                                                       cloud_response["detectedSourceLanguage"])
-            except:
-                cloud_translations[self.bad_translation["input"]] = ("", "")
+            cloud_translations = self.handle_request_to_cloud(request, translation_request)
         else:
             cloud_translations = []
+
+        return cloud_translations
+
+    def handle_request_to_cloud(self, request, translation_request):
+        cloud_translations = {}
+        try:
+            cloud_responses = self.cloud_translation.get_translation(translation_request)
+            self.cache.save_to_cache(cloud_responses, request.sourceLanguage, request.targetLanguage)
+            for cloud_response in cloud_responses:
+                if request.sourceLanguage:
+                    cloud_translations[cloud_response["input"]] = (cloud_response["translatedText"], "")
+                else:
+                    cloud_translations[cloud_response["input"]] = (cloud_response["translatedText"],
+                                                                   cloud_response["detectedSourceLanguage"])
+        except:
+            cloud_translations[self.bad_translation["input"]] = ("", "")
 
         return cloud_translations
 

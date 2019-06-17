@@ -2,16 +2,20 @@ import grpc
 
 import cached_translation_pb2
 import cached_translation_pb2_grpc
+import pytest
 
 from redis_cache_20 import RedisCache
 
 
 class TestCachedTranslation:
 
-    def test_from_cloud_without_source(self):
+    @pytest.fixture()
+    def cache(self):
         cache = RedisCache()
         cache.flushall()
+        return cache
 
+    def test_from_cloud_without_source(self, cache):
         with grpc.insecure_channel('localhost:50051') as channel:
             stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)
 
@@ -27,11 +31,7 @@ class TestCachedTranslation:
         assert response.translations[0].detectedSourceLanguage == "en"
         assert response.translations[0].input == "Hello world"
 
-    def test_from_cloud_with_source(self):
-        cache = RedisCache()
-
-        cache.flushall()
-
+    def test_from_cloud_with_source(self, cache):
         with grpc.insecure_channel('localhost:50051') as channel:
             stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)
 
@@ -47,11 +47,7 @@ class TestCachedTranslation:
         assert response.translations[0].detectedSourceLanguage == ""
         assert response.translations[0].input == "Hello world"
 
-    def test_from_cache_without_source(self):
-        cache = RedisCache()
-
-        cache.flushall()
-
+    def test_from_cache_without_source(self, cache):
         translation = {"translatedText": "Привет, мир [cached]",
                        "detectedSourceLanguage": "en",
                        "input": "Hello world"}
@@ -73,10 +69,7 @@ class TestCachedTranslation:
         assert response.translations[0].detectedSourceLanguage == "en"
         assert response.translations[0].input == "Hello world"
 
-    def test_page_without_source(self):
-        cache = RedisCache()
-        cache.flushall()
-
+    def test_page_without_source(self, cache):
         translation = {"translatedText": "Привет, мир [cached]",
                        "detectedSourceLanguage": "en",
                        "input": "Hello world"}
@@ -101,10 +94,7 @@ class TestCachedTranslation:
         assert response.translations[1].detectedSourceLanguage == "en"
         assert response.translations[1].input == "Hello world guys"
 
-    def test_page_with_source(self):
-        cache = RedisCache()
-        cache.flushall()
-
+    def test_page_with_source(self, cache):
         translation = {"translatedText": "Привет, мир [cached]",
                        "input": "Hello world"}
 
@@ -128,11 +118,7 @@ class TestCachedTranslation:
         assert response.translations[1].detectedSourceLanguage == ""
         assert response.translations[1].input == "Hello world guys"
 
-    def test_from_cache_with_source(self):
-        cache = RedisCache()
-
-        cache.flushall()
-
+    def test_from_cache_with_source(self, cache):
         translation = {"translatedText": "Привет, мир [cached]",
                        "input": "Hello world"}
 
@@ -153,10 +139,7 @@ class TestCachedTranslation:
         assert response.translations[0].detectedSourceLanguage == "en"
         assert response.translations[0].input == "Hello world"
 
-    def test_empty_text(self):
-        cache = RedisCache()
-        cache.flushall()
-
+    def test_empty_text(self, cache):
         with grpc.insecure_channel('localhost:50051') as channel:
             stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)
 
@@ -172,10 +155,7 @@ class TestCachedTranslation:
         assert response.translations[0].detectedSourceLanguage == "en"
         assert response.translations[0].input == ""
 
-    def test_empty_translation_request(self):
-        cache = RedisCache()
-        cache.flushall()
-
+    def test_empty_translation_request(self, cache):
         with grpc.insecure_channel('localhost:50051') as channel:
             stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)
 
@@ -191,10 +171,7 @@ class TestCachedTranslation:
         assert response.translations[0].detectedSourceLanguage == ""
         assert response.translations[0].input == "BAD ARGUMENT"
 
-    def test_empty_target(self):
-        cache = RedisCache()
-        cache.flushall()
-
+    def test_empty_target(self, cache):
         with grpc.insecure_channel('localhost:50051') as channel:
             stub = cached_translation_pb2_grpc.CachedTranslationStub(channel)
 
