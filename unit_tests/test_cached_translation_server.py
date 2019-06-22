@@ -239,9 +239,81 @@ class TestCachedTranslation:
         }
         result = cached_translations.merge_translations(request, cached_translations_dic, cloud_translations)
 
-        print(result)
-
         assert result == [{'translatedText': 'trans 1', 'detectedSourceLanguage': '', 'input': 'text 1'},
                           {'translatedText': 'trans 2', 'detectedSourceLanguage': '', 'input': 'text 2'},
                           {'translatedText': 'trans 3', 'detectedSourceLanguage': '', 'input': 'text 3'},
                           {'translatedText': 'trans 4', 'detectedSourceLanguage': '', 'input': 'text 4'}]
+
+    def test_merge_translations_cached_only(self, cached_translations, get_request_1):
+        request = get_request_1(texts=["text 1", "text 2"], sourceLanguage="", targetLanguage="ru")
+        cached_translations_dic = {
+            "text 1": ("trans 1", ""),
+            "text 2": ("trans 2", "")
+        }
+
+        cloud_translations = {}
+        result = cached_translations.merge_translations(request, cached_translations_dic, cloud_translations)
+
+        assert result == [{'translatedText': 'trans 1', 'detectedSourceLanguage': '', 'input': 'text 1'},
+                          {'translatedText': 'trans 2', 'detectedSourceLanguage': '', 'input': 'text 2'}]
+
+    def test_merge_translations_cloud_only(self, cached_translations, get_request_1):
+        request = get_request_1(texts=["text 1", "text 2"], sourceLanguage="", targetLanguage="ru")
+        cached_translations_dic = {}
+
+        cloud_translations = {
+            "text 1": ("trans 1", ""),
+            "text 2": ("trans 2", "")
+        }
+        result = cached_translations.merge_translations(request, cached_translations_dic, cloud_translations)
+
+        assert result == [{'translatedText': 'trans 1', 'detectedSourceLanguage': '', 'input': 'text 1'},
+                          {'translatedText': 'trans 2', 'detectedSourceLanguage': '', 'input': 'text 2'}]
+
+    def test_merge_translations_no_texts(self, cached_translations, get_request_1):
+        request = get_request_1(texts=[], sourceLanguage="", targetLanguage="ru")
+        cached_translations_dic = {}
+
+        cloud_translations = {}
+        result = cached_translations.merge_translations(request, cached_translations_dic, cloud_translations)
+
+        assert result == [{'translatedText': '', 'detectedSourceLanguage': '', 'input': 'BAD ARGUMENT'}]
+
+    def test_merge_translations_missed_text_from_cloud(self, cached_translations, get_request_1):
+        request = get_request_1(texts=["text 1", "text 2", "text 3", "text 4"], sourceLanguage="", targetLanguage="ru")
+        cached_translations_dic = {
+            "text 1": ("trans 1", ""),
+            "text 2": ("trans 3", "")
+        }
+
+        cloud_translations = {}
+        result = cached_translations.merge_translations(request, cached_translations_dic, cloud_translations)
+
+        assert result == [{'translatedText': 'trans 1', 'detectedSourceLanguage': '', 'input': 'text 1'},
+                          {'translatedText': 'trans 3', 'detectedSourceLanguage': '', 'input': 'text 2'},
+                          False, False]
+
+    def test_merge_translations_missed_text_from_cache(self, cached_translations, get_request_1):
+        request = get_request_1(texts=["text 1", "text 2", "text 3", "text 4"], sourceLanguage="", targetLanguage="ru")
+        cached_translations_dic = {}
+
+        cloud_translations = {"text 2": ("trans 2", ""),
+                              "text 4": ("trans 4", "")}
+
+        result = cached_translations.merge_translations(request, cached_translations_dic, cloud_translations)
+
+        print(result)
+
+        assert result == [{'translatedText': '', 'detectedSourceLanguage': '', 'input': 'BAD ARGUMENT'}]
+
+    def test_merge_translations_missed_texts(self, cached_translations, get_request_1):
+        request = get_request_1(texts=["text 1", "text 2", "text 3", "text 4"], sourceLanguage="", targetLanguage="ru")
+        cached_translations_dic = {}
+
+        cloud_translations = {}
+
+        result = cached_translations.merge_translations(request, cached_translations_dic, cloud_translations)
+
+        print(result)
+
+        assert result == [{'translatedText': '', 'detectedSourceLanguage': '', 'input': 'BAD ARGUMENT'}]
