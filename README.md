@@ -1,6 +1,6 @@
-#Cached translation
+# Cached translation
 
-###Caching service for google translate API
+### Caching service for google translate API
 
 
 ## Installation and running up
@@ -25,7 +25,7 @@ Example
 >python3 cached_translation_client.py --source=en --to=ru "Helo people"
  
  
- ##Test run
+ ## Test run
  Now unit tests works only when project was opened in Intelij idea IDE
  
  * open project in Intelij IDE - ide must contain python plugin or just use pycharm 
