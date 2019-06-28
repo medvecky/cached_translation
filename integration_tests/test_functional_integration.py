@@ -4,7 +4,7 @@ import cached_translation_pb2
 import cached_translation_pb2_grpc
 import pytest
 
-from redis_cache_20 import RedisCache
+from redis_cache import RedisCache
 
 
 class TestCachedTranslation:

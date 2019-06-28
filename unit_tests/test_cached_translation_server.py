@@ -2,7 +2,7 @@ from collections import namedtuple
 from unittest.mock import MagicMock
 
 import pytest
-import redis_cache_20
+import redis_cache
 import cached_translation_server
 import google_translation
 
@@ -36,7 +36,7 @@ class TestCachedTranslation:
     @pytest.fixture
     def save_to_cache_mock(self, monkeypatch):
         save_to_cache_mock = MagicMock()
-        monkeypatch.setattr(redis_cache_20.RedisCache, "save_to_cache", save_to_cache_mock)
+        monkeypatch.setattr(redis_cache.RedisCache, "save_to_cache", save_to_cache_mock)
         return save_to_cache_mock
 
     @pytest.fixture

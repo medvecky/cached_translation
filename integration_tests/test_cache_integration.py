@@ -1,4 +1,4 @@
-from ..redis_cache_20 import RedisCache
+from ..redis_cache import RedisCache
 import pytest
 
 
