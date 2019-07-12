@@ -26,7 +26,7 @@
  ## Test run
  Now unit tests works only when project was opened in Intelij idea IDE
  
- * open project in Intelij IDE - ide must contain python plugin or just use pycharm 
+ * Open project in Intelij IDE - ide must contain python plugin or just use pycharm 
  * Unit tests may be runned as is
  * Integration tests needs working sever and added to run configuration environment variable
  ``` 
